@@ -1,3 +1,4 @@
+<!doctype html><html lang="sk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><style>body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}</style>
 <title>Cesta kvapky</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -220,7 +221,9 @@ input[type=range]{width:100%;accent-color:var(--water);height:28px}
 .rk-bar{grid-column:1/-1;height:5px;border-radius:3px;background:var(--surface2);overflow:hidden;margin-top:3px}
 .rk-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--water),var(--mineral));border-radius:3px;transition:width .8s}
 .rk-bar.big{height:10px;margin:6px 0}
-@media (max-width:480px){.brand>svg{display:none}.top-in{gap:8px}.brand h1{font-size:18px}.iconbtn{padding:7px 9px}}
+.fsbtn{background:var(--water);color:var(--surface);border-color:var(--water)}
+@media (max-width:760px){.fsbtn span{display:none}}
+@media (max-width:480px){.brand small{display:none!important}.rankc{display:none}.brand h1{white-space:nowrap}.brand>svg{display:none}.top-in{gap:8px}.brand h1{font-size:18px}.iconbtn{padding:7px 9px}}
 @media (max-width:520px){.rankc .rk-x{display:none}.rankc .rk-n{max-width:84px;font-size:12px}.lvl button{padding:6px 9px}}
 .st.locked{opacity:.62}.st.locked .n{border-color:var(--muted);color:var(--muted)}
 .st small.eyebrow{font-size:11px}
@@ -341,7 +344,7 @@ input[type=range]{width:100%;accent-color:var(--water);height:28px}
 .bagsg{transform:scaleY(0)}.bagsup .bagsg{transform:scaleY(1);transition:transform .7s cubic-bezier(.3,1.6,.5,1)}
 
 @media (prefers-reduced-motion: reduce){ *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important} }
-</style>
+</style></head><body>
 
 <header class="top">
   <div class="top-in wrap">
@@ -353,6 +356,7 @@ input[type=range]{width:100%;accent-color:var(--water);height:28px}
       <button id="lv-zs" aria-pressed="false">ZŠ</button>
       <button id="lv-ss" aria-pressed="false">SŠ</button>
     </div>
+    <button class="iconbtn fsbtn" id="btn-fs" aria-label="Celá obrazovka" title="Celá obrazovka"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path class="fs-in" d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/><path class="fs-out" d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5" style="display:none"/></svg><span>Celá obrazovka</span></button>
     <button class="rankc" id="rankc" aria-label="Hodnosť a denník"></button>
     <button class="iconbtn" id="btn-gl" aria-label="Denník a slovník">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M4 4h11a4 4 0 0 1 4 4v12H8a4 4 0 0 1-4-4z"/><path d="M8 20a4 4 0 0 1 0-8h11"/></svg><span>Denník</span>
@@ -2128,6 +2132,13 @@ function diary(){const lv=L(),p=P();const r=rank();
 $('#btn-gl').onclick=diary;$('#rankc').onclick=diary;
 $('#ov').onclick=e=>{if(e.target.id==='ov')$('#ov').hidden=true};
 
+// fullscreen (works inside an iframe with allowfullscreen; otherwise opens a new tab)
+(function(){const b=$('#btn-fs');const de=document.documentElement;const can=document.fullscreenEnabled||document.webkitFullscreenEnabled;const inFrame=(()=>{try{return window.self!==window.top}catch(e){return true}})();
+  const isFs=()=>!!(document.fullscreenElement||document.webkitFullscreenElement);
+  const ico=()=>{const f=isFs();b.querySelector('.fs-in').style.display=f?'none':'';b.querySelector('.fs-out').style.display=f?'':'none';b.querySelector('span').textContent=f?'Zavrieť celú obrazovku':(can?'Celá obrazovka':'Otvoriť v novom okne')};
+  b.onclick=()=>{if(isFs()){(document.exitFullscreen||document.webkitExitFullscreen).call(document);return}
+    if(can){const r=(de.requestFullscreen||de.webkitRequestFullscreen).call(de);if(r&&r.catch)r.catch(()=>{if(inFrame)window.open(location.href,'_blank')})}else window.open(location.href,'_blank')};
+  document.addEventListener('fullscreenchange',ico);document.addEventListener('webkitfullscreenchange',ico);ico();})();
 // init
 renderHub();
 if(!S.level){$('#ov-card').innerHTML=`<div class="eyebrow">Vodstvo · geografia</div><h2 style="font-size:30px;margin-top:6px">Cesta kvapky</h2><p>Vyber si výpravu. Úroveň môžeš kedykoľvek zmeniť hore v lište.</p>
@@ -2135,4 +2146,4 @@ if(!S.level){$('#ov-card').innerHTML=`<div class="eyebrow">Vodstvo · geografia<
   <button data-l="ss"><span class="duo">${CAST.ss.map(k=>`<span class="gp">${portraitSVG(k)}</span>`).join('')}</span><span><b>Expedícia HYDRA</b><span>Stredná škola · loď, batyskaf a záhada teplej šošovky v Atlantiku</span></span></button></div>`;
   $('#ov').hidden=false;$$('.choose button').forEach(b=>b.onclick=()=>{setLevel(b.dataset.l);$('#ov').hidden=true})}
 requestAnimationFrame(()=>{const land=$('#land');const p=P();let c=ST.findIndex((s,i)=>isOpen(i)&&!p.d.includes(s.id));if(c<0)c=0;const svg=land.querySelector('svg');if(svg){const k=svg.getBoundingClientRect().width/1600;land.scrollLeft=Math.max(0,HM[c][0]*k-land.clientWidth/2)}});
-</script>
+</script></body></html>
